@@ -1,0 +1,4 @@
+EQUITY RISK PLATFORM — CREDIT SPREAD
+La implementación está en src/results_engine/credit_spread.py, función calculate_credit_spread_adjustment(). Usa curvas, vencimiento, rating y valoración.
+Las curvas vienen de CREDIT_CURVES. Si falta una curva aparece normalmente CS_MISSING_CURVE.
+Una incidencia en CREDIT_CURVES no debería modificar directamente la puesta en equivalencia.

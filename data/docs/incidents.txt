@@ -1,0 +1,6 @@
+EQUITY RISK PLATFORM — INCIDENCIAS
+INC-001: diferencias >0,5 % en puesta en equivalencia. Revisar effective_ownership, adjusted_equity, fechas y valuation_details. Si inputs son correctos, revisar equity_method.py.
+INC-002: exposición aproximadamente x100. Revisar position_unit, currency y conversion_factor.
+INC-003: falta CREDIT_SPREAD. Buscar CS_MISSING_CURVE y revisar CREDIT_CURVES.
+INC-004: COMPLETED_WITH_WARNINGS. Revisar reconcile_results.
+INC-005: valuation_details correcto pero risk_results distinto. Revisar agregación antes de cambiar la fórmula.

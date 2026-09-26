@@ -1,0 +1,3 @@
+EQUITY RISK PLATFORM — SEGURIDAD
+Principio de mínimo privilegio. Usuarios de consulta no modifican configuración. Cambios de producción requieren permisos adicionales.
+Secretos no deben estar en repositorios ni logs. La API aplica autenticación y autorización por cartera. Datos de prueba deben ser ficticios, anonimizados o autorizados.

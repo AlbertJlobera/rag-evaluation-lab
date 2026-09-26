@@ -1,0 +1,4 @@
+EQUITY RISK PLATFORM — OBSERVABILIDAD
+Métricas técnicas: latencia API, duración batch, errores y recursos. Métricas funcionales: resultados, rechazos, reconciliaciones fuera de tolerancia y publicaciones.
+Logs: correlation_id, process_date, portfolio_id y component. correlation_id permite seguir una ejecución.
+Investigar incidentes correlacionando logs, métricas y estado funcional.

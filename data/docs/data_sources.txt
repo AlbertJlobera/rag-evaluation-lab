@@ -1,0 +1,3 @@
+EQUITY RISK PLATFORM — FUENTES
+POSITIONS: posiciones. MARKET_PRICES: precios y divisas. OWNERSHIP_DATA: participación efectiva. ADJUSTED_EQUITY: patrimonio neto ajustado. CREDIT_CURVES: curvas de crédito.
+Mezclar OWNERSHIP_DATA de una fecha con ADJUSTED_EQUITY de otra puede producir diferencias aunque ambos registros sean válidos.

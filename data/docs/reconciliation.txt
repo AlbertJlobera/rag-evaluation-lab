@@ -1,0 +1,4 @@
+EQUITY RISK PLATFORM — RECONCILIACIÓN
+Se ejecuta tras cálculo y antes de publicación. Para puesta en equivalencia la tolerancia estándar es 0,5 %.
+Compara fecha, cartera, métrica y entidad. Las diferencias pueden venir de fechas, participación, ajustes, agregación o cálculo.
+Si valuation_details es correcto pero risk_results no, investigar agregación. Estados: MATCHED, OUT_OF_TOLERANCE y NOT_COMPARABLE.

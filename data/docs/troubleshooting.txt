@@ -1,0 +1,3 @@
+EQUITY RISK PLATFORM — TROUBLESHOOTING
+Procedimiento: confirmar fecha/cartera; revisar EOD; validar fuentes; comparar valuation_details con risk_results; revisar reconciliación; consultar logs por correlation_id; después revisar código.
+Si valuation_details tiene mal la puesta en equivalencia y los inputs son correctos, revisar equity_method.py. Si valuation_details es correcto pero risk_results no, investigar agregación. Si ambos son coherentes pero falla reconciliación, comprobar referencia, fechas y tolerancias.

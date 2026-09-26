@@ -1,0 +1,5 @@
+EQUITY RISK PLATFORM — PUESTA EN EQUIVALENCIA
+La lógica está en src/results_engine/equity_method.py, función calculate_equity_method().
+Usa participación efectiva y patrimonio neto ajustado: equity_value = effective_ownership * adjusted_equity.
+Si falta adjusted_equity, el registro queda INVALID_INPUT. Primero se escribe en valuation_details y después se agrega en risk_results.
+La tolerancia de reconciliación estándar es 0,5 %. Una diferencia superior puede proceder del cálculo, datos desactualizados, cambios de participación o fechas distintas.

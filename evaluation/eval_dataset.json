@@ -1,0 +1,77 @@
+[
+  {
+    "id": "Q01",
+    "query": "¿Dónde se calcula la puesta en equivalencia?",
+    "relevant_docs": ["equity_method.txt"]
+  },
+  {
+    "id": "Q02",
+    "query": "¿Qué datos se utilizan para calcular el valor de una sociedad participada?",
+    "relevant_docs": ["equity_method.txt", "data_sources.txt"]
+  },
+  {
+    "id": "Q03",
+    "query": "La exposición de algunas posiciones aparece multiplicada aproximadamente por 100. ¿Qué debería revisar?",
+    "relevant_docs": ["incidents.txt", "exposure_calculation.txt"]
+  },
+  {
+    "id": "Q04",
+    "query": "¿Qué ocurre si no existe una curva de crédito válida para la fecha de proceso?",
+    "relevant_docs": ["credit_spread.txt"]
+  },
+  {
+    "id": "Q05",
+    "query": "El proceso nocturno ha terminado con advertencias. ¿Qué tarea debería revisar primero?",
+    "relevant_docs": ["incidents.txt", "eod_process.txt"]
+  },
+  {
+    "id": "Q06",
+    "query": "El resultado detallado es correcto pero el resultado agregado no coincide. ¿Dónde investigarías el problema?",
+    "relevant_docs": ["reconciliation.txt", "incidents.txt", "troubleshooting.txt"]
+  },
+  {
+    "id": "Q07",
+    "query": "¿Cómo puedo seguir una misma ejecución a través de varios componentes del sistema?",
+    "relevant_docs": ["monitoring.txt"]
+  },
+  {
+    "id": "Q08",
+    "query": "¿Qué fuentes contienen la participación efectiva y el patrimonio neto ajustado?",
+    "relevant_docs": ["data_sources.txt"]
+  },
+  {
+    "id": "Q09",
+    "query": "¿Qué comprobaciones se realizan después de desplegar una nueva versión?",
+    "relevant_docs": ["deployment.txt"]
+  },
+  {
+    "id": "Q10",
+    "query": "¿Un usuario autenticado puede consultar automáticamente todas las carteras?",
+    "relevant_docs": ["security.txt"]
+  },
+  {
+    "id": "Q11",
+    "query": "Los inputs son correctos pero valuation_details contiene mal el cálculo de participación sobre patrimonio. ¿Qué módulo revisarías?",
+    "relevant_docs": ["troubleshooting.txt", "equity_method.txt"]
+  },
+  {
+    "id": "Q12",
+    "query": "¿En qué orden se ejecutan las principales etapas del cierre diario?",
+    "relevant_docs": ["eod_process.txt"]
+  },
+  {
+    "id": "Q13",
+    "query": "¿Por qué dos fuentes individualmente válidas podrían producir una diferencia funcional en el cálculo?",
+    "relevant_docs": ["data_sources.txt"]
+  },
+  {
+    "id": "Q14",
+    "query": "¿Qué diferencia hay entre valuation_details y risk_results?",
+    "relevant_docs": ["architecture.txt"]
+  },
+  {
+    "id": "Q15",
+    "query": "Antes de modificar código por una incidencia, ¿qué pasos de diagnóstico deberían realizarse?",
+    "relevant_docs": ["troubleshooting.txt"]
+  }
+]

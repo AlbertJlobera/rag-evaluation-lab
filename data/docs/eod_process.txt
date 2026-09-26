@@ -1,0 +1,4 @@
+EQUITY RISK PLATFORM — CIERRE EOD
+El DAG Airflow equity_risk_eod ejecuta: ingest_positions, ingest_market_data, validate_inputs, calculate_results, reconcile_results y publish_results.
+calculate_results puede producir exposición, puesta en equivalencia y Credit Spread.
+reconcile_results puede provocar COMPLETED_WITH_WARNINGS si hay diferencias. Ante diferencias tras el cierre hay que localizar si nacen en cálculo, reconciliación o publicación.

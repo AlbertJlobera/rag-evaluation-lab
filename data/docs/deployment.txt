@@ -1,0 +1,3 @@
+EQUITY RISK PLATFORM — DESPLIEGUE
+La aplicación usa Docker. CI ejecuta tests, análisis estático y construcción de imagen. Producción requiere versión etiquetada y aprobaciones.
+Secretos fuera del repositorio. Tras despliegue se ejecutan smoke tests. Cambios de fórmulas requieren regresión con carteras representativas.

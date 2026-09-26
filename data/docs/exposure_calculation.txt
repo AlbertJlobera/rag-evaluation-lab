@@ -1,0 +1,4 @@
+EQUITY RISK PLATFORM — EXPOSICIÓN
+El cálculo está en src/results_engine/exposure.py, función calculate_exposure(). Combina posición, precio y factor de conversión.
+Los resultados se guardan como metric_type=EXPOSURE. Ante exposición anormalmente alta, revisar unidad de posición, divisa y conversion_factor.
+Exposición y puesta en equivalencia pueden compartir fuentes, pero son cálculos diferentes.
