@@ -3,13 +3,17 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_community.retrievers import BM25Retriever
 from pathlib import Path
+from src.document_loader import get_documents
 
+# Raíz del proyecto
+project_root = Path(__file__).resolve().parent.parent
 
+# /data/docs dentro del proyecto
+db_path = project_root / "db"
 
+# db_path =r"C:\Ai Proyecto\RAG\rag-evaluation-lab\db"
 
-db_path =r"C:\Ai Proyecto\RAG\rag-evaluation-lab\db"
-
-
+documents = get_documents()
 
 
 

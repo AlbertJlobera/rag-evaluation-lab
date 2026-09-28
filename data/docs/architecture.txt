@@ -1,4 +1,8 @@
 EQUITY RISK PLATFORM — ARQUITECTURA
-La plataforma calcula, reconcilia y publica métricas de riesgo de renta variable. src/input_validation/validator.py valida entradas. src/results_engine/orchestrator.py coordina cálculos y delega en equity_method.py, exposure.py y credit_spread.py.
-Los resultados de detalle se guardan en valuation_details y los agregados en risk_results (PostgreSQL). Una API FastAPI expone resultados. El cierre batch se ejecuta con Airflow.
-Estados: COMPLETED, COMPLETED_WITH_WARNINGS y FAILED. COMPLETED no garantiza una reconciliación funcional satisfactoria.
+La plataforma calcula, reconcilia y publica métricas de riesgo de renta variable. 
+src/input_validation/validator.py valida entradas. src/results_engine/orchestrator.py coordina cálculos y 
+delega en equity_method.py, exposure.py y credit_spread.py.
+Los resultados de detalle se guardan en valuation_details y los agregados en risk_results (PostgreSQL).
+ Una API FastAPI expone resultados. El cierre batch se ejecuta con Airflow.
+Estados: COMPLETED, COMPLETED_WITH_WARNINGS y FAILED. COMPLETED no garantiza una reconciliación funcional
+ satisfactoria.

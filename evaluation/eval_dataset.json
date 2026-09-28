@@ -22,7 +22,7 @@
   {
     "id": "Q05",
     "query": "El proceso nocturno ha terminado con advertencias. ¿Qué tarea debería revisar primero?",
-    "relevant_docs": ["incidents.txt", "eod_process.txt"]
+    "relevant_docs": ["incidents.txt", "eod_process.txt", "troubleshooting.txt", "monitoring.txt"]
   },
   {
     "id": "Q06",
