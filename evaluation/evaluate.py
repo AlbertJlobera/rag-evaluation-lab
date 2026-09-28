@@ -1,18 +1,23 @@
 import json
+import time
 from pathlib import Path
 
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.retrievers import BM25Retriever
+from sentence_transformers import CrossEncoder
 
 from src.document_loader import get_documents
 from dotenv import load_dotenv
 
+
 load_dotenv()
+
 
 # =========================================================
 # CONFIGURACIÓN
 # =========================================================
+
 def get_doc_id(doc):
     source = doc.metadata["source"]
 
@@ -23,7 +28,7 @@ def get_doc_id(doc):
 # Número de documentos que evaluamos finalmente
 FINAL_K = 3
 
-# Número de candidatos que Dense y BM25 entregan a RRF
+# Número de candidatos antes de RRF / Reranking
 CANDIDATE_K = 5
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -37,8 +42,9 @@ EVAL_PATH = Path(__file__).parent / "eval_dataset.json"
 # CARGAR GOLDEN DATASET
 # =========================================================
 
-with open(EVAL_PATH, encoding="utf-8") as f:
-    eval_dataset = json.load(f)
+def get_json():
+    with open(EVAL_PATH, encoding="utf-8") as f:
+        return json.load(f)
 
 
 # =========================================================
@@ -51,7 +57,6 @@ embeddings = OpenAIEmbeddings(
     model="text-embedding-3-small"
 )
 
-
 vector_store = Chroma(
     persist_directory=str(DB_PATH),
     embedding_function=embeddings
@@ -61,8 +66,14 @@ vector_store = Chroma(
 def retrieve_dense(query):
     """
     Dense baseline.
-    Devuelve Top 3 para compararlo justamente con los demás.
+
+    Query
+      ↓
+    Dense Retrieval
+      ↓
+    Top 3
     """
+
     return vector_store.similarity_search(
         query=query,
         k=FINAL_K
@@ -82,9 +93,16 @@ bm25_retriever = BM25Retriever.from_documents(
 def retrieve_bm25(query):
     """
     BM25 baseline.
-    Devuelve Top 3.
+
+    Query
+      ↓
+    BM25
+      ↓
+    Top 3
     """
+
     bm25_retriever.k = FINAL_K
+
     return bm25_retriever.invoke(query)
 
 
@@ -99,15 +117,6 @@ def reciprocal_rank_fusion(
 ):
     """
     Fusiona varios rankings utilizando RRF.
-
-    rankings:
-        Lista con rankings de distintos retrievers.
-
-    final_k:
-        Número de documentos finales.
-
-    c:
-        Constante de suavizado de RRF.
     """
 
     scores = {}
@@ -120,7 +129,6 @@ def reciprocal_rank_fusion(
             start=1
         ):
 
-            # Usamos el nombre del fichero como ID único
             doc_id = get_doc_id(doc)
 
             documents_by_id[doc_id] = doc
@@ -131,14 +139,14 @@ def reciprocal_rank_fusion(
             # Score RRF
             scores[doc_id] += 1 / (c + rank)
 
-    # Ordenar documentos por score RRF
+    # Ordenamos por score RRF
     sorted_doc_ids = sorted(
         scores,
         key=scores.get,
         reverse=True
     )
 
-    # Devolver únicamente Top K final
+    # Devolvemos Top K final
     return [
         documents_by_id[doc_id]
         for doc_id in sorted_doc_ids[:final_k]
@@ -151,15 +159,13 @@ def reciprocal_rank_fusion(
 
 def retrieve_hybrid(query):
     """
-    Hybrid Retrieval:
-
     Dense Top 5
          +
     BM25 Top 5
          ↓
         RRF
          ↓
-      Top 3
+       Top 3
     """
 
     # Dense candidates
@@ -183,6 +189,63 @@ def retrieve_hybrid(query):
 
 
 # =========================================================
+# RERANKER
+# =========================================================
+
+# El modelo se carga UNA sola vez al arrancar el script.
+# No se vuelve a cargar para cada query.
+reranker = CrossEncoder(
+    "BAAI/bge-reranker-v2-m3"
+)
+
+
+def retrieve_reranker(query):
+    """
+    Dense Top 5
+         ↓
+    BGE Cross-Encoder
+         ↓
+    Reordenación
+         ↓
+       Top 3
+    """
+
+    # 1. Dense genera los candidatos
+    dense_results = vector_store.similarity_search(
+        query=query,
+        k=CANDIDATE_K
+    )
+
+    if not dense_results:
+        raise ValueError(
+            f"Dense no devolvió candidatos para: {query}"
+        )
+
+    # 2. Creamos pares query-documento
+    pairs = [
+        [query, doc.page_content]
+        for doc in dense_results
+    ]
+
+    # 3. Cross-Encoder calcula relevancia
+    scores = reranker.predict(pairs)
+
+    # 4. Asociamos cada documento con su score
+    #    y ordenamos de mayor a menor
+    reranked_results = sorted(
+        zip(dense_results, scores),
+        key=lambda x: x[1],
+        reverse=True
+    )
+
+    # 5. Nos quedamos con Top 3
+    return [
+        doc
+        for doc, score in reranked_results[:FINAL_K]
+    ]
+
+
+# =========================================================
 # EVALUACIÓN
 # =========================================================
 
@@ -194,18 +257,39 @@ def evaluate_retriever(
     recalls = []
     precisions = []
     reciprocal_ranks = []
+    latencies = []
 
     print(f"\n=== {name} ===\n")
+
+    eval_dataset = get_json()
 
     for item in eval_dataset:
 
         query = item["query"]
         relevant_docs = item["relevant_docs"]
 
-        # Todos los retrievers cumplen el mismo contrato:
-        #
-        # query -> List[Document]
+        # =================================================
+        # MEDIR LATENCIA
+        # =================================================
+
+        start_time = time.perf_counter()
+
         results = retrieve_function(query)
+
+        end_time = time.perf_counter()
+
+        latency = end_time - start_time
+
+        latencies.append(latency)
+
+        # =================================================
+        # COMPROBAR RESULTADOS
+        # =================================================
+
+        if not results:
+            raise ValueError(
+                f"{name} no devolvió documentos para: {query}"
+            )
 
         retrieved_docs = [
             get_doc_id(doc)
@@ -220,10 +304,12 @@ def evaluate_retriever(
         # -------------------------
         # Recall@K
         # -------------------------
+
         recall = (
             len(relevant_retrieved)
             / len(relevant_docs)
         )
+
         # -------------------------
         # Precision@K
         # -------------------------
@@ -232,6 +318,7 @@ def evaluate_retriever(
             len(relevant_retrieved)
             / len(retrieved_docs)
         )
+
         # -------------------------
         # Reciprocal Rank
         # -------------------------
@@ -242,6 +329,7 @@ def evaluate_retriever(
             retrieved_docs,
             start=1
         ):
+
             if doc in relevant_docs:
                 rr = 1 / rank
                 break
@@ -250,11 +338,16 @@ def evaluate_retriever(
         precisions.append(precision)
         reciprocal_ranks.append(rr)
 
+        # =================================================
+        # RESULTADO DE LA QUERY
+        # =================================================
+
         print(
             f"{item['id']} | "
             f"Recall@{FINAL_K}: {recall:.2f} | "
             f"Precision@{FINAL_K}: {precision:.2f} | "
-            f"RR: {rr:.2f}"
+            f"RR: {rr:.2f} | "
+            f"Latency: {latency * 1000:.2f} ms"
         )
 
         print(
@@ -286,6 +379,15 @@ def evaluate_retriever(
         / len(reciprocal_ranks)
     )
 
+    mean_latency = (
+        sum(latencies)
+        / len(latencies)
+    )
+
+    # =====================================================
+    # MOSTRAR RESULTADOS GLOBALES
+    # =====================================================
+
     print(
         f"=== RESULTADOS {name} ==="
     )
@@ -305,11 +407,17 @@ def evaluate_retriever(
         f"{mrr:.3f}"
     )
 
+    print(
+        f"Avg Latency:   "
+        f"{mean_latency * 1000:.2f} ms"
+    )
+
     return {
         "name": name,
         "recall": mean_recall,
         "precision": mean_precision,
-        "mrr": mrr
+        "mrr": mrr,
+        "latency": mean_latency
     }
 
 
@@ -332,9 +440,14 @@ hybrid_metrics = evaluate_retriever(
     retrieve_function=retrieve_hybrid
 )
 
+reranker_metrics = evaluate_retriever(
+    name="RERANKER",
+    retrieve_function=retrieve_reranker
+)
+
 
 # =========================================================
-# COMPARACIÓN
+# COMPARACIÓN FINAL
 # =========================================================
 
 print("\n=== COMPARACIÓN ===")
@@ -344,14 +457,16 @@ print(
     f"{'Recall':<12}"
     f"{'Precision':<12}"
     f"{'MRR':<12}"
+    f"{'Latency ms':<12}"
 )
 
-print("-" * 48)
+print("-" * 60)
 
 for metrics in [
     dense_metrics,
     bm25_metrics,
-    hybrid_metrics
+    hybrid_metrics,
+    reranker_metrics
 ]:
 
     print(
@@ -359,4 +474,5 @@ for metrics in [
         f"{metrics['recall']:<12.3f}"
         f"{metrics['precision']:<12.3f}"
         f"{metrics['mrr']:<12.3f}"
+        f"{metrics['latency'] * 1000:<12.2f}"
     )
